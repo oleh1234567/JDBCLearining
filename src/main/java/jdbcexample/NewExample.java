@@ -1,12 +1,13 @@
 package jdbcexample;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 public class NewExample {
     public static void main(String[] args) {
-        Map<String, Integer> duplicates = new HashMap<>();
+
         String url = "jdbc:postgresql:mydatabase";
         String user = "postgres";
         String password = "ilikerap2009";
@@ -19,10 +20,8 @@ public class NewExample {
 
                 //insertIntoTable(statement, usernames);
 
+                removeDuplicates(getAndPrintDuplicates(statement), statement);
 
-                getAndPrintDuplicates(duplicates, statement);
-                //todo:: upgrade this method to remove duplicates with 3 or more occurrences
-                //removeDuplicates(duplicates, statement);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -46,8 +45,9 @@ public class NewExample {
         statement.execute(sql);
     }
 
-    private static void getAndPrintDuplicates(Map<String, Integer> duplicates,
-                                              Statement statement) throws SQLException {
+    private static Map<Long, String> getAndPrintDuplicates(Statement statement) throws SQLException {
+        Map<Long, String> duplicates = new HashMap<>();
+
         String getDuplicatesSQL = "SELECT id, username" +
                 " FROM test" +
                 " WHERE username IN (" +
@@ -59,18 +59,25 @@ public class NewExample {
         try (ResultSet result = statement.executeQuery(getDuplicatesSQL)) {
             System.out.println("*************dublicates*************");
             while (result.next()) {
-                int id = result.getInt(1);
+                long id = result.getLong(1);
                 String username = result.getString("username");
-                duplicates.put(username, id);
-                System.out.format("%3d %20s%n", id, username);
+                duplicates.put(id, username);
             }
         }
+        System.out.println(duplicates);
+        return duplicates;
     }
 
-    private static void removeDuplicates(Map<String, Integer> duplicates, Statement statement) throws SQLException {
+    private static void removeDuplicates(Map<Long, String> duplicates, Statement statement) throws SQLException {
         String delete = "DELETE FROM test WHERE id = ";
-        for (Integer i : duplicates.values()) {
-            statement.execute(delete + i);
+        Set<String> bucket = new HashSet<>(); // here we retrieve at least one element
+
+        for(Map.Entry<Long, String> entry : duplicates.entrySet()){
+            if (!bucket.contains(entry.getValue())) {
+                bucket.add(entry.getValue());
+            } else {
+                statement.execute(delete + entry.getKey());
+            }
         }
     }
 }
