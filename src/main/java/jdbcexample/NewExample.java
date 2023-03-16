@@ -76,7 +76,7 @@ public class NewExample {
             if (!bucket.contains(entry.getValue())) {
                 bucket.add(entry.getValue());
             } else {
-                statement.execute(delete + entry.getKey());
+                statement.executeUpdate(delete + entry.getKey());
             }
         }
     }

@@ -3,17 +3,18 @@ package jdbcexample;
 import java.sql.*;
 
 public class JdbcExample {
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
         String url = "jdbc:postgresql:mydatabase";
         String user = "postgres";
         String password = "ilikerap2009";
 
         try (Connection connection =
                      DriverManager.getConnection(url, user, password)) {
+            System.out.println(connection.getMetaData().getMaxRowSize());
             try (Statement statement = connection.createStatement()) {
                 String sql = "SELECT * FROM products";
                 String insert = "INSERT INTO products (name, department, price, weight)" +
-                                "VALUES ('MOZART', 'GARBAGE', 1, 10)";
+                        "VALUES ('MOZART', 'GARBAGE', 1, 10)";
                 String update = "UPDATE products " +
                         "SET name = 'Mozart', department = 'Garbage' " +
                         "WHERE id = 9";
@@ -21,7 +22,7 @@ public class JdbcExample {
                     System.out.format("%2s %30s %15s %10s %10s%n",
                             "id", "name", "department", "price", "weight");
                     while (result.next()) {
-                       int id = result.getInt("id");
+                        int id = result.getInt("id");
                         String name = result.getString("name");
                         String department = result.getString("department");
                         int price = result.getInt("price");
