@@ -15,22 +15,24 @@ public class Tests {
 
         try(Connection connection =
                     DriverManager.getConnection(url, properties)){
-            System.out.println(connection.getMetaData().supportsResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE));
             try (Statement statement =
-                    connection.createStatement()) {
-                connection.setAutoCommit(false);
-                String sql = "SELECT * FROM products";
+                    connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
+                String sql = "SELECT * FROM products WHERE id = 1";
                 try (ResultSet result =
                         statement.executeQuery(sql)){
-                   /* while (result.next()){
-                        int id = result.getInt("id");
-                        String name = result.getString("name");
-                        String department = result.getString("department");
-                        int price = result.getInt("price");
-                        int weight = result.getInt("weight");
-                        System.out.format("%2d %30s %15s %10d %10d%n",
-                                id, name, department, price, weight);
-                    }*/
+                    result.moveToInsertRow();
+                    result.updateInt(1, 101);
+                    result.updateString("name", "Black cola");
+                    result.updateString("department", "Drinks");
+                    result.updateInt("price", 123);
+                    result.updateInt("weight", 1);
+                    result.insertRow();
+
+                    result.beforeFirst();
+
+                    while (result.next()){
+                        System.out.println(result.getString("name"));
+                    }
                 }
 
             }
