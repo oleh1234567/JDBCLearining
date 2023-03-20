@@ -12,6 +12,7 @@ public class Tests {
         Properties properties = new Properties();
         properties.put("user", "postgres");
         properties.put("password", "ilikerap2009");
+        System.out.println(properties);
 
         try(Connection connection =
                     DriverManager.getConnection(url, properties)){
